@@ -91,8 +91,21 @@ In this exercise you will:
 #### Reflection Questions
 
 1. **How do you link `prev` and `next` pointers correctly using a static array?**
+   ```
+Die `prev`- und `next`-Zeiger werden im statischen Array `nodes` durch Indizes verknüpft. Für `nodes[i]` wird `prev` auf `&nodes[i-1]` gesetzt (außer bei `i=0`, dann `NULL`) und `next` auf `&nodes[i+1]` (außer bei `i=4`, dann `NULL`). So entsteht eine doppelt verkettete Liste, indem die Adressen der Array-Elemente direkt verwendet werden.
+   ```
 2. **What are advantages and limitations of compile-time vs. dynamic allocation?**
+   ```
+- Vorteile: Kein `malloc`/`free` nötig, schneller, da Speicher fest reserviert ist. Kein Risiko von Speicherlecks.
+   - Nachteile: Feste Größe (hier 5 Knoten), nicht erweiterbar zur Laufzeit. Mehr Speicherbedarf, wenn nicht alle Knoten genutzt werden.
+ Dynamisch:
+   - Vorteile: Flexible Größe, Knoten können zur Laufzeit hinzugefügt/entfernt werden.
+   - Nachteile: Overhead durch `malloc`/`free`, Risiko von Speicherlecks oder falschen Zeigern.
+   ```
 3. **How would you extend this static list to include additional data fields?**
+   ```
+- Anstatt `void *data` in `DNode` könnte man eine Struktur definieren, z. B. `struct Data { int id; char *name; }`, und `DNode` anpassen: `struct Data data;`. Jeder Knoten speichert dann die Struktur direkt. Bei statischer Allokation müsste das Array entsprechend mehr Speicher reservieren, z. B. `DNode nodes[5]` bleibt gleich, aber `data` enthält mehrere Felder.
+   ```
 
 ---
 
@@ -159,8 +172,17 @@ In this exercise you will:
 #### Reflection Questions
 
 1. **Why is `malloc` necessary when adding nodes dynamically?**
+   ```
+`malloc` reserviert Speicher zur Laufzeit für neue Knoten, da die Größe der Liste nicht im Voraus bekannt ist. Im Gegensatz zu statischer Allokation (wie in Task 1) erlaubt `malloc` flexibles Hinzufügen von Knoten, ohne die Größe bei der Kompilierung festzulegen.
+   ```
 2. **How can you traverse the list to print each node’s address and value?**
+   ```
+Man startet am `head` und folgt den `next`-Zeigern: `for (SNode *p = head; p; p = p->next)`. Für jeden Knoten gibt man die Adresse mit `(void*)p` und den Wert mit `p->value` aus, z. B. `printf("Node at %p: %d\n", (void*)p, p->value)`.
+   ```
 3. **What are the consequences of not freeing the list before exit?**
+   ```
+Ohne `free_list` bleibt der mit `malloc` allokierte Speicher belegt, was zu einem Speicherleck führt. Das Programm gibt den Speicher nicht an das Betriebssystem zurück, was bei wiederholtem Hinzufügen von Knoten den Speicherbedarf erhöht und die Leistung beeinträchtigen kann.
+   ```
 
 ---
 
@@ -244,8 +266,17 @@ gcc -o solutions/json_main solutions/json_main.c solutions/json_list.o -ljansson
 #### Reflection Questions
 
 1. **How does using `getopt` make the program more flexible than `argv[1]`?**
+   ```
+`getopt` erlaubt das Parsen von Kommandozeilenoptionen wie `-i <datei>`, was flexibler ist als die feste Position von `argv[1]`. Es unterstützt mehrere Optionen, optionale Reihenfolge und klare Fehlermeldungen, z. B. über `usage`.
+   ```
 2. **What happens if the user omits the `-i` option?**
+   ```
+Ohne `-i` ist `filename` `NULL`, und das Programm ruft `usage` auf, zeigt eine Fehlermeldung (`Usage: ...`) und beendet sich mit `EXIT_FAILURE`.
+   ```
 3. **How can you validate that the JSON file loaded is indeed an array?**
+   ```Mit `json_is_array(root)` prüft man, ob das geladene JSON ein Array ist. Falls nicht, gibt man eine Fehlermeldung aus und gibt `NULL` zurück, wie in `parse_json` implementiert.
+
+   ```
 
 ---
 
